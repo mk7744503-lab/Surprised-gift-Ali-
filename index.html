@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050711">
+<title>Beyond Words — Areshey</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;overflow:hidden;height:100vh;
+ background:radial-gradient(ellipse at center,#211842,#080918 65%,#03040b);
+ color:#fff;font-family:Georgia,serif;
+}
+canvas{position:fixed;inset:0;width:100%;height:100%}
+.top{
+ position:fixed;top:20px;left:20px;right:20px;
+ display:flex;justify-content:space-between;
+ font:10px Arial;letter-spacing:3px;color:#c9baff
+}
+.center{
+ position:fixed;inset:0;display:grid;
+ place-items:center;text-align:center;padding:25px
+}
+.panel{max-width:500px}
+.kicker{font:10px Arial;letter-spacing:5px;color:#b7a3ff}
+h1{font-size:clamp(42px,10vw,78px);font-weight:400;line-height:1}
+h1 span{display:block;font-style:italic;color:#c6b3ff}
+p{font-size:16px;line-height:1.8;color:#c9c5dd}
+button{
+ background:#ffffff0b;border:1px solid #bba6ff;
+ color:white;border-radius:30px;padding:14px 24px;
+ letter-spacing:2px;font-size:10px;cursor:pointer
+}
+#explore,#final{display:none}
+#message{
+ display:none;position:fixed;inset:0;
+ background:#080918ed;place-items:center;
+ text-align:center;padding:30px
+}
+.card{max-width:420px}
+#message p{font-size:27px}
+#bottom{
+ position:fixed;bottom:25px;left:0;right:0;
+ text-align:center;font:10px Arial;letter-spacing:2px;color:#aaa
+}
+</style>
+</head>
+<body>
+
+<canvas id="space"></canvas>
+
+<div class="top">
+ BEYOND WORDS
+ <span id="counter">SIGNAL 00</span>
+</div>
+
+<div class="center" id="welcome">
+ <div class="panel">
+  <div class="kicker">A PRIVATE UNIVERSE</div>
+  <h1>Some things <span>live beyond words.</span></h1>
+  <p>A little universe. A thousand feelings. One person.</p>
+  <button onclick="start()">ENTER THE UNKNOWN</button>
+ </div>
+</div>
+
+<div class="center" id="explore">
+ <div class="panel">
+  <div class="kicker">DISCOVER THE SIGNALS</div>
+  <h1>Find <span>what's hidden.</span></h1>
+  <p>Tap the glowing stars around you.</p>
+ </div>
+</div>
+
+<div id="message">
+ <div class="card">
+  <div class="kicker" id="number"></div>
+  <p id="words"></p>
+  <button onclick="closeMessage()">RETURN TO SPACE</button>
+ </div>
+</div>
+
+<div class="center" id="final">
+ <div class="panel">
+  <div class="kicker">THE LAST TRANSMISSION</div>
+  <h1>And now, <span>just listen.</span></h1>
+  <p>Some feelings don't fit inside a screen.</p>
+  <button onclick="playFinal()">PLAY MY VOICE</button>
+  <audio id="voice" src="assets/Areshey_Final_Reveal.mp3"></audio>
+ </div>
+</div>
+
+<div id="bottom">TOUCH THE STARS · DISCOVER THE UNIVERSE</div>
+
+<script>
+const canvas=document.getElementById("space");
+const ctx=canvas.getContext("2d");
+let W,H,stars=[],found=new Set();
+
+const messages=[
+"Some people arrive quietly, then become a whole universe.",
+"I want to understand you, even in the quiet moments.",
+"Your feelings deserve space.",
+"Listening is more than waiting for my turn to speak.",
+"You don't have to be okay every second.",
+"Even the smallest details about you stay with me.",
+"I cannot rewrite a difficult moment. I can do better next time.",
+"You deserve patience.",
+"I want to know the real you.",
+"Not every silence needs fixing.",
+"I am offering honest effort, not perfect promises.",
+"I hope you always feel free to tell me what hurts.",
+"You are allowed to grow and change.",
+"I want to celebrate your happiness.",
+"I want to be gentle with your feelings.",
+"Thank you for letting me close.",
+"If I misunderstand, I want to learn.",
+"Your happiness is not a responsibility you carry alone.",
+"Some memories become huge with time.",
+"You matter. More than these words can explain."
+];
+
+function resize(){
+ W=canvas.width=innerWidth;
+ H=canvas.height=innerHeight;
+ stars=Array.from({length:130},()=>({
+  x:Math.random()*W,
+  y:Math.random()*H,
+  r:Math.random()*2,
+  p:Math.random()*6
+ }));
+}
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ stars.forEach(s=>{
+  let a=.3+.7*Math.abs(Math.sin(Date.now()*.001+s.p));
+  ctx.fillStyle=`rgba(210,195,255,${a})`;
+  ctx.beginPath();
+  ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+  ctx.fill();
+ });
+ if(found.size<20){
+  for(let i=0;i<20;i++){
+   let a=i*Math.PI*2/20+Date.now()*.00004;
+   let r=Math.min(W,H)*.29;
+   let x=W/2+Math.cos(a)*r;
+   let y=H/2+Math.sin(a)*r;
+   ctx.beginPath();
+   ctx.arc(x,y,found.has(i)?3:6,0,Math.PI*2);
+   ctx.fillStyle=found.has(i)?"#75e5ef":"#b69aff";
+   ctx.shadowBlur=20;
+   ctx.shadowColor="#a78bfa";
+   ctx.fill();
+   ctx.shadowBlur=0;
+  }
+ }
+ requestAnimationFrame(draw);
+}
+function start(){
+ welcome.style.display="none";
+ explore.style.display="grid";
+}
+function closeMessage(){
+ message.style.display="none";
+ if(found.size===20){
+  explore.style.display="none";
+  final.style.display="grid";
+ }
+}
+function playFinal(){
+ voice.play().catch(()=>alert(
+ "Upload your MP3 as assets/Areshey_Final_Reveal.mp3"
+ ));
+}
+canvas.addEventListener("click",e=>{
+ if(welcome.style.display!=="none" &&
+ welcome.style.display!=="")return;
+ if(final.style.display==="grid")return;
+ if(message.style.display==="grid")return;
+ let best=-1,dist=45;
+ for(let i=0;i<20;i++){
+  if(found.has(i))continue;
+  let a=i*Math.PI*2/20+Date.now()*.00004;
+  let r=Math.min(W,H)*.29;
+  let x=W/2+Math.cos(a)*r;
+  let y=H/2+Math.sin(a)*r;
+  let d=Math.hypot(e.clientX-x,e.clientY-y);
+  if(d<dist){dist=d;best=i;}
+ }
+ if(best<0)return;
+ found.add(best);
+ number.textContent="SIGNAL "+String(best+1).padStart(2,"0");
+ words.textContent=messages[best];
+ counter.textContent="SIGNAL "+found.size;
+ message.style.display="grid";
+});
+window.addEventListener("resize",resize);
+resize();
+draw();
+</script>
+</body>
+</html>
